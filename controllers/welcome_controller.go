@@ -22,7 +22,7 @@ func NewWelcomeController() IWelcomeController {
 	return &WelcomeController{}
 }
 
-func (uc *WelcomeController) Greet(c *gin.Context) {
+func (wc *WelcomeController) Greet(c *gin.Context) {
 	welcome := Welcome{
 		Greet:    "Welcome to letsGo",
 		Doc:      "https://letsgo-framework.github.io/",

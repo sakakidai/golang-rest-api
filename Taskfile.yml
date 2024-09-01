@@ -1,0 +1,29 @@
+# https://taskfile.dev
+
+version: '3'
+
+dotenv:
+  - ".env"
+
+vars:
+  MAIGRATIONS_PATH: ./db/migrations
+  GOOSE_DRIVER: postgres
+  GOOSE_DBSTRING: $DB_URL
+
+tasks:
+  run:dev-server:
+    cmds:
+      - GO_ENV="dev" go run main.go
+  goose:create:
+    cmds:
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.GOOSE_DBSTRING}} goose -dir {{.MAIGRATIONS_PATH}} create {{.CLI_ARGS}} sql
+    desc: "Create a migration file. File name must be specified as an argument. example: task goose:create -- create_user_table"
+  goose:up:
+    cmds:
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.GOOSE_DBSTRING}} goose -dir {{.MAIGRATIONS_PATH}} up
+  goose:down:
+    cmds:
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.GOOSE_DBSTRING}} goose -dir {{.MAIGRATIONS_PATH}} down
+  goose:status:
+    cmds:
+      - GOOSE_DRIVER={{.GOOSE_DRIVER}} GOOSE_DBSTRING={{.GOOSE_DBSTRING}} goose -dir {{.MAIGRATIONS_PATH}} status

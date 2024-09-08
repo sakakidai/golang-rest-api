@@ -1,7 +1,7 @@
 package db
 
 import (
-	"fmt"
+	"golang-rest-api/utils"
 	"log"
 	"os"
 
@@ -11,10 +11,12 @@ import (
 )
 
 func NewDB() *gorm.DB {
-	fmt.Println("Starting database connction...")
+	logger := utils.NewLogger()
+
+	logger.Info("Starting database connction...")
 	// Retrieve enviroment variables from .env file only in the development enviroment.
-	if os.Getenv("GO_ENV") == "dev" {
-		fmt.Println("Read .env file")
+	if os.Getenv("GO_ENV") == "development" {
+		logger.Info("Read .env file")
 		err := godotenv.Load()
 		if err != nil {
 			log.Fatal(err)
@@ -27,13 +29,15 @@ func NewDB() *gorm.DB {
 		log.Fatalln(err)
 	}
 
-	fmt.Println("Database Connected")
+	logger.Info("Database Connected")
 	return db
 }
 
 func CloseDB(db *gorm.DB) {
+	logger := utils.NewLogger()
+
 	sqlDB, _ := db.DB()
 	if err := sqlDB.Close(); err != nil {
-		log.Fatalln(err)
+		logger.Fatal(err.Error())
 	}
 }

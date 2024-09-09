@@ -11,23 +11,36 @@ import (
 )
 
 func main() {
+	// Database
 	db := db.NewDB()
-	wc := controllers.NewWelcomeController()
+
+	// Repository
+	userRepository := repositories.NewUserRepository(db)
 	contentItemRepository := repositories.NewContentItemRepository(db)
+
+	// Usecase
+	userUsecase := usecases.NewUserUsecase(userRepository)
 	contentItemUsecase := usecases.NewContentItemUsecase(contentItemRepository)
+
+	// Controller
+	welcomeController := controllers.NewWelcomeController()
+	userController := controllers.NewUserController(userUsecase)
 	contentItemController := controllers.NewContentItemController(contentItemUsecase)
 
-	r := gin.Default()
-	r.Use(middleware.ZapLogger())
-	r.Use(gin.Recovery())
+	e := gin.Default()
+	e.Use(middleware.ZapLogger())
+	e.Use(gin.Recovery())
 
-	v1 := r.Group("api/v1")
-	// welcome
-	v1.GET("/welcome", wc.Greet)
-	// content_items
-	ci := v1.Group("content_items")
+	v1 := e.Group("api/v1")
+
+	v1.GET("/welcome", welcomeController.Greet)
+
+	u := v1.Group("/users")
+	u.POST("/signup", userController.SignUp)
+
+	ci := v1.Group("/content_items")
 	ci.GET("/", contentItemController.GetAll)
 	ci.POST("/", contentItemController.Create)
 
-	r.Run(":8080")
+	e.Run(":8080")
 }

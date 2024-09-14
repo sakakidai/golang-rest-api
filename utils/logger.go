@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"os"
+	"golang-rest-api/config"
 	"sync"
 
 	"go.uber.org/zap"
@@ -17,13 +17,13 @@ var (
 func NewLogger() *zap.Logger {
 	once.Do(func() {
 		fmt.Println("Initialize zap logger")
+		_config := config.GetConfig()
 
 		var err error
-		env := os.Getenv("GO_ENV")
-		if env == "development" {
-			config := zap.NewDevelopmentConfig()
-			config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder // ログレベルに色を付ける
-			logger, err = config.Build()
+		if _config.DebugMode {
+			logConfig := zap.NewDevelopmentConfig()
+			logConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder // ログレベルに色を付ける
+			logger, err = logConfig.Build()
 		} else {
 			logger, err = zap.NewProduction()
 		}

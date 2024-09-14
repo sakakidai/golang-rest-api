@@ -5,25 +5,16 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func NewDB() *gorm.DB {
+func ConnectDB() *gorm.DB {
 	logger := utils.NewLogger()
-
 	logger.Info("Starting database connction...")
-	// Retrieve enviroment variables from .env file only in the development enviroment.
-	if os.Getenv("GO_ENV") == "development" {
-		logger.Info("Read .env file")
-		err := godotenv.Load()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 
 	dsn := os.Getenv("DB_URL")
+	logger.Debug("Connecting to " + dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalln(err)

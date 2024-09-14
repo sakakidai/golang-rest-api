@@ -1,6 +1,7 @@
 package main
 
 import (
+	"golang-rest-api/config"
 	"golang-rest-api/controllers"
 	"golang-rest-api/db"
 	"golang-rest-api/middleware"
@@ -11,22 +12,32 @@ import (
 )
 
 func main() {
+	// Config
+	config.LoadConfig()
+
 	// Database
-	db := db.NewDB()
+	db := db.ConnectDB()
 
 	// Repository
-	userRepository := repositories.NewUserRepository(db)
-	contentItemRepository := repositories.NewContentItemRepository(db)
+	var (
+		userRepository        = repositories.NewUserRepository(db)
+		contentItemRepository = repositories.NewContentItemRepository(db)
+	)
 
 	// Usecase
-	userUsecase := usecases.NewUserUsecase(userRepository)
-	contentItemUsecase := usecases.NewContentItemUsecase(contentItemRepository)
+	var (
+		userUsecase        = usecases.NewUserUsecase(userRepository)
+		contentItemUsecase = usecases.NewContentItemUsecase(contentItemRepository)
+	)
 
 	// Controller
-	welcomeController := controllers.NewWelcomeController()
-	userController := controllers.NewUserController(userUsecase)
-	contentItemController := controllers.NewContentItemController(contentItemUsecase)
+	var (
+		welcomeController     = controllers.NewWelcomeController()
+		userController        = controllers.NewUserController(userUsecase)
+		contentItemController = controllers.NewContentItemController(contentItemUsecase)
+	)
 
+	// Router
 	e := gin.Default()
 	e.Use(middleware.ZapLogger())
 	e.Use(gin.Recovery())
@@ -36,6 +47,7 @@ func main() {
 	v1.GET("/welcome", welcomeController.Greet)
 
 	u := v1.Group("/users")
+	// u.POST("temporary_users", userController.TemporaryRegister)
 	u.POST("/signup", userController.SignUp)
 
 	ci := v1.Group("/content_items")

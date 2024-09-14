@@ -10,6 +10,7 @@ import (
 )
 
 type IUserController interface {
+	// TemporaryRegister(c *gin.Context)
 	SignUp(c *gin.Context)
 }
 
@@ -20,6 +21,10 @@ type userController struct {
 func NewUserController(uu usecases.IUserUsecase) IUserController {
 	return &userController{uu}
 }
+
+// func (uc *userController) TemporaryRegister(c *gin.Context) {
+// 	c.JSON(http.StatusOK, 'ssss')
+// }
 
 func (uc *userController) SignUp(c *gin.Context) {
 	user := models.User{}

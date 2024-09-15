@@ -10,7 +10,10 @@ import (
 )
 
 type Config struct {
-	DebugMode         bool `mapstructure:"debug_mode" default:"false"`
+	DebugMode bool `mapstructure:"debug_mode" default:"false"`
+	AuthToken struct {
+		TokenExpirationHours time.Duration `mapstructure:"token_expiration_hours" default:"1"`
+	} `mapstructure:"auth_token"`
 	EmailVerification struct {
 		Enabled              bool          `mapstructure:"enabled" default:"false"`
 		TokenExpirationHours time.Duration `mapstructure:"token_expiration_hours" default:"1"`

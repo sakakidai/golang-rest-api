@@ -1,3 +1,5 @@
 email_verification:
   enabled: true
   token_expiration_hours: 1
+auth_token:
+  token_expiration_hours: 12

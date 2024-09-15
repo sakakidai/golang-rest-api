@@ -57,6 +57,8 @@ func main() {
 	u := v1.Group("/users")
 	// u.POST("temporary_users", userController.TemporaryRegister)
 	u.POST("/signup", userController.SignUp)
+	u.POST("/login", userController.LogIn)
+	u.POST("/confirm_email", userController.ConfirmEmail)
 
 	ci := v1.Group("/content_items")
 	ci.GET("/", contentItemController.GetAll)

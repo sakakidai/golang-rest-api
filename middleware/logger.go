@@ -5,20 +5,25 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
-func ZapLogger() gin.HandlerFunc {
-	logger := utils.NewLogger()
-
+func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		requestID := uuid.New().String()
+		// グローバルなloggerにリクエストIDを付加したloggerを作成
+		logger := utils.Logger().With(zap.String("request_id", requestID))
+		// loggerをコンテキストに保存
+		c.Set("logger", logger)
+
 		start := time.Now()
 
 		c.Next()
 
 		latency := time.Since(start)
 
-		logger.Info("Request",
+		logger.Info("Request processed",
 			zap.String("client_ip", c.ClientIP()),
 			zap.String("method", c.Request.Method),
 			zap.String("path", c.Request.URL.Path),

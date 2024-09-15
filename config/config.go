@@ -4,15 +4,18 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	AppName           string `mapstructure:"app_name"`
-	DebugMode         bool   `mapstructure:"debug_mode"`
-	EmailVerification bool   `mapstructure:"email_verification"`
-	SMTP              struct {
+	DebugMode         bool `mapstructure:"debug_mode" default:"false"`
+	EmailVerification struct {
+		Enabled              bool          `mapstructure:"enabled" default:"false"`
+		TokenExpirationHours time.Duration `mapstructure:"token_expiration_hours" default:"1"`
+	} `mapstructure:"email_verification"`
+	SMTP struct {
 		Host     string `mapstructure:"host"`
 		Port     int    `mapstructure:"port"`
 		Username string `mapstructure:"username"`
@@ -31,8 +34,7 @@ func GetConfig() Config {
 
 func LoadConfig() {
 	once.Do(func() {
-		fmt.Println("Load config")
-
+		fmt.Println("Loading config...")
 		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
 		viper.AddConfigPath("./config")
@@ -55,5 +57,6 @@ func LoadConfig() {
 		if err := viper.Unmarshal(&config); err != nil {
 			panic(err.Error())
 		}
+		fmt.Printf("Loaded config is: %+v\n", config)
 	})
 }

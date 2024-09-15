@@ -10,8 +10,8 @@ import (
 )
 
 func ConnectDB() *gorm.DB {
-	logger := utils.NewLogger()
-	logger.Info("Starting database connction...")
+	logger := utils.Logger()
+	logger.Info("Database connecting...")
 
 	dsn := os.Getenv("DB_URL")
 	logger.Debug("Connecting to " + dsn)
@@ -25,7 +25,7 @@ func ConnectDB() *gorm.DB {
 }
 
 func CloseDB(db *gorm.DB) {
-	logger := utils.NewLogger()
+	logger := utils.Logger()
 
 	sqlDB, _ := db.DB()
 	if err := sqlDB.Close(); err != nil {

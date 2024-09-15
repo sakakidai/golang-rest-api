@@ -7,6 +7,8 @@ import (
 	"golang-rest-api/middleware"
 	"golang-rest-api/repositories"
 	"golang-rest-api/usecases"
+	"golang-rest-api/utils"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,8 +17,14 @@ func main() {
 	// Config
 	config.LoadConfig()
 
+	// Logger
+	utils.InitLogger()
+
 	// Database
 	db := db.ConnectDB()
+
+	logger := utils.Logger()
+	logger.Info("Go enviroment is " + os.Getenv("GO_ENV"))
 
 	// Repository
 	var (
@@ -39,7 +47,7 @@ func main() {
 
 	// Router
 	e := gin.Default()
-	e.Use(middleware.ZapLogger())
+	e.Use(middleware.Logger())
 	e.Use(gin.Recovery())
 
 	v1 := e.Group("api/v1")
@@ -54,5 +62,6 @@ func main() {
 	ci.GET("/", contentItemController.GetAll)
 	ci.POST("/", contentItemController.Create)
 
+	logger.Info("Go server is running")
 	e.Run(":8080")
 }

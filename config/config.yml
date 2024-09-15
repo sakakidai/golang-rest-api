@@ -1,2 +1,3 @@
-app_name: "MyApp"
-email_verification: true
+email_verification:
+  enabled: true
+  token_expiration_hours: 1

@@ -17,6 +17,7 @@ import (
 type IUserUsecase interface {
 	SignUp(c *gin.Context, user models.User) error
 	LogIn(c *gin.Context, user models.User) (string, error)
+	CreateConfrimToken(c *gin.Context, userID *uint) error
 	ConfirmEmail(c *gin.Context, tokenString string) error
 }
 
@@ -41,16 +42,10 @@ func (uu *userUsecase) SignUp(c *gin.Context, user models.User) error {
 		return err
 	}
 
-	var confirmToken string
 	if config.GetConfig().EmailVerification.Enabled {
-		// メール確認のトークン作成
-		confirmToken, err = generateComfirmToken(c, newUser.ID)
-		if err != nil || confirmToken == "" {
-			logger(c).Error(err.Error())
+		if err := sendConfrimEmail(c, &newUser); err != nil {
 			return err
 		}
-		logger(c).Debug("confirmToken: " + confirmToken)
-		// メール送信（非同期処理にする）
 	}
 
 	return nil
@@ -86,7 +81,7 @@ func (uu *userUsecase) ConfirmEmail(c *gin.Context, tokenString string) error {
 	}
 
 	user := models.User{}
-	if err = uu.ur.FindByID(&user, *userID); err != nil {
+	if err := uu.ur.FindByID(&user, *userID); err != nil {
 		return err
 	}
 
@@ -97,6 +92,23 @@ func (uu *userUsecase) ConfirmEmail(c *gin.Context, tokenString string) error {
 	now := time.Now()
 	user.ConfirmedAt = &now
 	if err = uu.ur.Update(&user); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uu *userUsecase) CreateConfrimToken(c *gin.Context, userID *uint) error {
+	if userID == nil {
+		return fmt.Errorf("userID does not exist")
+	}
+
+	user := models.User{}
+	if err := uu.ur.FindByID(&user, *userID); err != nil {
+		return err
+	}
+
+	if err := sendConfrimEmail(c, &user); err != nil {
 		return err
 	}
 
@@ -129,6 +141,19 @@ func generateAuthToken(c *gin.Context, ID uint) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func sendConfrimEmail(c *gin.Context, user *models.User) error {
+	confirmToken, err := generateComfirmToken(c, user.ID)
+	if err != nil || confirmToken == "" {
+		logger(c).Error(err.Error())
+		return err
+	}
+	logger(c).Debug("Generated confirmToken: " + confirmToken)
+
+	// メールを送信する処理
+
+	return nil
 }
 
 func generateComfirmToken(c *gin.Context, ID uint) (string, error) {
